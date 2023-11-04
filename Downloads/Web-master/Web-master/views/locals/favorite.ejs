@@ -1,0 +1,47 @@
+<div class="my-5">
+    <h1 class="text-center mb-5">즐겨찾기</h1>
+    <div id="div_favorite"></div>
+</div>
+
+<script id="temp_favorite" type="x-handlebars-template">
+    <table class="table table-striped table-hover">
+        {{#each .}}
+        <tr>
+            <td>{{id}}</td>
+            <td>{{place_name}}</td>
+            <td>{{phone}}</td>
+            <td>{{address_name}}</td>
+            <td><button class="btn btn-danger btn-sm" id="{{id}}">삭제</button></td>
+        </tr>
+        {{/each}}
+    </table>
+</script>
+
+<script type="module"> //데이터 가져오기, 타입=모듈 나올것 같다고 강조!
+    import { app } from "/javascripts/firebase.js"; //public이 root
+    import { getDatabase, ref, onValue, remove}  //onvalue 데이터가 변경될 때마다 작동, 삭제 remove
+        from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js"; //cdn으로 불러왔기 때문에, auth가 아니라 database 사용
+    const db=getDatabase(app); //app 빈칸 중간고사 언급★
+
+    const ref_favorite=ref(db, `favorite/${sessionStorage.getItem("uid")}`);
+    onValue(ref_favorite, result=>{
+        let items=[];
+        result.forEach(item=>{
+            //console.log(item.val());
+            items.push(item.val());
+        });
+        const temp=Handlebars.compile($("#temp_favorite").html());
+        $("#div_favorite").html(temp(items));
+    });
+
+    //삭제 버튼을 클릭한 경우
+    $("#div_favorite").on("click", ".btn", async function(){
+        const id=$(this).attr("id");
+        if(confirm(`${id}번 즐겨찾기를 삭제하시겠습니까?`)){
+            const ref_favorite=ref(db, 
+                `favorite/${sessionStorage.getItem("uid")}/${id}`);
+            await remove(ref_favorite);
+                alert("삭제완료!");
+        }
+    });
+</script>

@@ -1,0 +1,102 @@
+<div class="my-5">
+    <h1 class="text-center mb-5">장바구니</h1>
+    <div id="div_cart"></div>
+</div>
+<script id="temp_cart" type="x-handlebars-template">
+    <table class="table">
+            <tr>
+                <td colspan="7">
+                <!-- colspan : 행 7개를 하나로 합쳐줌 -->
+                    <input type="checkbox" id="all">
+                    <button class="btn btn-warning btn-sm ms-3">선택삭제</button>
+                </td>
+            </tr>
+        {{#each .}} 
+        <!-- each :핸들바 반복문, 배열 이름이 없을 때 / 시험 언급★. -->
+            <tr>
+                <td><input type="checkbox" class="chk"></td>
+                <!-- 하나일 때는 id, 여러개일 때는 class -->
+                <td><img src="{{thumbnail}}" width="30"></td>
+                <td>{{title}}</td>
+                <td>{{authors}}</td>
+                <td>{{price}}</td>
+                <td>{{publisher}}</td>
+                <td><button class="del btn btn-danger btn-sm" isbn="{{isbn}}">삭제</button></td>
+                <!-- 버튼 이름 btn, isbn 빈칸 언급 ★ -->
+            </tr>
+        {{/each}} 
+    </table>
+</script>
+
+<script type="module"> //데이터 가져오기, 타입=모듈 나올것 같다고 강조!
+    import { app } from "/javascripts/firebase.js"; //public이 root
+    import { getDatabase, ref, onValue, remove}  //onvalue 데이터가 변경될 때마다 작동, 삭제 remove
+        from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js"; //cdn으로 불러왔기 때문에, auth가 아니라 database 사용
+    const db=getDatabase(app); //app 빈칸 중간고사 언급★
+
+    //선택삭제버튼을 클릭한 경우
+    $("#div_cart").on("click", ".btn-warning", function(){ //div_cart라는 ID의 요소 내부에서 .btn-warning 클래스의 요소가 클릭되었을 때 함수 실행
+        const chk=$("#div_cart .chk:checked").length;
+        if(chk==0){
+            alert("삭제할 도서를 선택하세요!");
+        }else{
+            if(!confirm(chk + "개 도서를 삭제하실래요?")) return;
+            //도서 삭제
+            $("#div_cart .chk:checked").each(item=>{
+                alert('..');
+            });
+        }
+    });
+
+    //체크박스는 시험문제 출제X
+    //전체 체크박스를 클릭한 경우
+    $("#div_cart").on("click", "#all", function(){
+        if($(this).is(":checked")){
+        // this(all)가 체크되어있으면
+            $("#div_cart .chk").prop("checked", true);
+        }else{
+            $("#div_cart .chk").prop("checked", false);
+        }
+    });
+
+    //각 행의 체크박스를 클릭한 경우
+    $("#div_cart").on("click", ".chk", function(){
+        const all=$("#div_cart .chk").length; //전체 체크개수
+        const chk=$("#div_cart .chk:checked").length; //체크된 체크의 개수
+        if(all==chk){
+            $("#div_cart #all").prop("checked", true); //prop :요소의 속성 조작
+        }else{
+            $("#div_cart #all").prop("checked", false);
+        }
+    });
+
+    //장바구니에 저장되어있는 도서목록 가져오기 (items에 넣음)
+    const ref_cart=ref(db, `cart/${sessionStorage.getItem("uid")}`);
+    // ref_cart 참조객체에 데이터베이스에서 cart아래 현재 세션의 사용자 id(uid)를 포함하는 경로 참조
+    onValue(ref_cart, result=>{
+        //onvalue 함수로 데이터가 변경될 때 호출될 콜백함수를 result에 저장 
+        let items=[]; //items 변수를 선언하고 배열을 선언,초기화
+        result.forEach(item=>{  //result.forEach로 db에서 가져온 각 항목을 반복적으로 처리하여 item에 담음
+            // console.log(item.key, item.val());
+            items.push(item.val()); //item 객체에서 추출한 값을 items 배열에 추가(도서목록 추가)
+        });
+        //console.log(items);
+        const temp=Handlebars.compile($("#temp_cart").html()); 
+        //핸들바를 사용하여 temp_cart 아이디를 가진 html 요소의 내용을 컴파일하여 temp 변수에 저장
+        $("#div_cart").html(temp(items)); // 컴파일된 템플릿에 items 배열의 데이터를 전달하여 동적 생성된 html을 얻고 div_cart 아이디에 넣음
+        // 컴파일한 html 값을 div_cart에 넣는 과정 중간고사 언급★
+
+    });
+    
+    //삭제버튼을 클릭한 경우
+    $("#div_cart").on("click", ".btn-danger", async function(){ //async 비동기 함수(비동기적 실행)
+        const isbn=$(this).attr("isbn");
+        if(!confirm(`${isbn} 삭제하실래요?`)) return; //삭제 안할거면 return해서 빠져나감(앞에 !라 not), confirm(삭제 확인,취소 팝업 상자)
+        const ref_cart = ref(db, `cart/${sessionStorage.getItem("uid")}/${isbn}`);
+        await remove(ref_cart); //ref_cart가 참조하는 위치 데이터 삭제(await 비동기 작업이 완료될 때까지 기다림)
+        alert("삭제되었습니다.")
+    });
+
+    
+    
+</script>

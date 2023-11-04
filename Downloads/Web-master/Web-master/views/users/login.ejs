@@ -1,0 +1,81 @@
+<style>
+    form span{
+        width:100px;
+    } 
+    /* css 선택자 form 내부에 있는 모든 span요소의 너비를 100으로 지정 */
+</style>
+<div class="row my-5 justify-content-center">
+    <!-- 패딩과 마진 최대값 5  -->
+    <div class="col-6">
+        <h1 class="text-center">로그인</h1>
+        <form name="frm" class="card p-3"> 
+            <!-- form 요소에 name 속성으로 form 이름을 frm으로 지정, name(frm) 중간고사 언급 -->
+            <div class="input-group mb-3">
+                <span class="input-group-text">이메일</span>
+                <input name="email" class="form-control" value="dbswjd9857@inha.edu">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">비밀번호</span>
+                <input name="password" class="form-control" type="password" value="12341234">
+            </div>
+            <button class="btn btn-primary">로그인</button>
+        </form>
+        <div class="text-end pt-2">
+            <a href="/users/join">회원가입</a>
+            <!-- href속성(하이퍼링크 참조) 회원가입이라는 텍스트를 클릭할 시 웹피이지 url이 /users/join으로 이동 -->
+        </div>
+    </div>
+</div>
+
+<script type="module"> 
+    // 기본 script에서는 import를 사용할 수 없음(type="module") 사용
+    // > 브라우저에서 지원하는 모듈을 사용할 수 있음
+    import { app } from "/javascripts/firebase.js"; // javascripts의 firebase에서 내보낸 app 변수 사용 가능
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+    const auth=getAuth(app);
+    //getAuth의 함수에 app을 넣은 값을 매개변수로 전달하여 auth 객체 생성
+    //app, auth 괄호 중간고사 언급
+    
+    // 객체 선택시 id = #, class = ., name = 없음
+    $(frm).on("submit", function(e){
+        e.preventDefault();
+
+        //유효성 체크 (이메일, 이벤트 공백)
+        const email=$(frm.email).val();
+        const pass=$(frm.password).val();
+
+        if(email == ""){
+            alert("이메일을 입력하세요!");
+            $(frm.email).focus(); //이메일에 커서두기
+        }else if(pass == ""){
+            alert("비밀번호를 입력하세요!")
+            $(frm.password).focus();
+        }else{
+            //로그인 체크
+            //alert(email + pass);
+            signInWithEmailAndPassword(auth, email, pass).then(success=>{
+                //auth 경로 시험 언급
+                //then 성공했을 때
+                console.log(success);
+                // 개발자도구(F12) - Application - sessiion storage 저장
+                sessionStorage.setItem("email", email); //email이라는 키와 값인 email을 세션에 저장
+                sessionStorage.setItem("uid",success.user.uid); // 브라우저 세션에 uid키와 값(로그인에 성공한 사용자의 이메일) 저장
+
+                alert("로그인에 성공했습니다.");
+                if(sessionStorage.getItem("target")){
+                    location.href=sessionStorage.getItem("target");
+                }else{
+                    location.href="/";
+                }
+                
+
+
+                //location 이동, /루트(홈화면)
+            }).catch(error=>{
+                // 로그인 실패 시
+                console.log(error);
+                alert(error.message);
+            });
+        }
+    });
+</script>

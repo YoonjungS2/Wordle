@@ -1,0 +1,38 @@
+<!-- Modal : HTML 파일로 저장해도 가능 -->
+
+  <!-- Modal -->
+  <div class="modal fade" id="modal{{@index}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">도서정보</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <!-- 도서 정보 기입자리 -->
+        <div class="modal-body">
+            <div class="row">
+              <!-- 컬럼 12칸 중 그림을 4칸, 내용을 8칸으로 지정 -->
+                <div class="col-4">
+                    <img src="{{check thumbnail}}" width="90%">
+                    <!-- thumbnail 변수를 check 함수에 전달 > thumbnail 변수에 저장된 이미지를 check 함수로 처리한 정보 반환 -->
+                </div>
+                <div class="col-8">
+                    <h4>{{title}}</h4>
+                    <hr>
+                    <div class="my-3">저자: {{authors}}</div>
+                    <div class="my-3">가격: {{format price}}</div>
+                    <div class="my-3">출판사: {{publisher}}</div>
+                    <div class="my-3">출판일: {{datetime}}</div>
+                    <div class="my-3">ISBN: {{isbn}}</div>
+                </div>
+            </div>
+            <hr>
+            <div>{{contents}}</div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
