@@ -1,0 +1,63 @@
+<!-- <style>
+    ul li{
+        font-size: 1.5rem;
+    }
+</style> -->
+
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">HOME</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/books">도서검색</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/locals">지역검색</a>
+          </li>
+          <li class="nav-item" id="cart" style="display:none;">
+            <a class="nav-link active" aria-current="page" href="/books/cart">장바구니</a>
+          </li>
+          <li class="nav-item" id="favorite" style="display:none;">
+            <a class="nav-link active" aria-current="page" href="/locals/favorite">즐겨찾기</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/posts">게시판</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav d-flex">
+            <li class="nav-item" id="login">
+              <a class="nav-link active" aria-current="page" href="/users/login">로그인</a>
+            </li>
+            <li class="nav-item" id="email" style="display: none;">
+              <a class="nav-link active" aria-current="page" href="/users/mypage">email</a>
+            </li>
+            <li class="nav-item" id="logout" style="display: none;">
+              <a class="nav-link active" aria-current="page" href="/users/login">로그아웃</a>
+            </li>
+          </ul>
+      </div>
+    </div>
+  </nav>
+  <script>
+    if(sessionStorage.getItem("email")){
+      $("#login, #email, #logout, #cart, #favorite").toggle();
+      // 로그인, 이메일, 로그아웃, 카트의 객체 시각상태 반전(toggle)★
+      $("#email a").html(sessionStorage.getItem("email"));
+    }
+
+    //로그아웃 메뉴를 클릭한 경우
+    $("#logout").on("click", "a", function(e){
+      e.preventDefault();
+      if(confirm("정말로 로그아웃하실래요?")){
+        sessionStorage.clear();
+        //clear 세션 저장소의 정보 모두 삭제 (set 해줬던 item 두개 모두 삭제)
+        location.href="/";
+      }else{
+        alert("로그아웃이 취소되었습니다.");
+      }
+    });
+  </script>

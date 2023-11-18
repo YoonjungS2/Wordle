@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap');
+
+* {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+/* font-family : 모든 글꼴을 바꿈 */
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+    /* 텍스트를 몇 줄로 표현을 허용할지 결정하는 변수 값 */
+  -webkit-box-orient: vertical;
+}

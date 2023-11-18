@@ -1,0 +1,190 @@
+<style>
+    #div_books img {
+        cursor : pointer;
+    }
+    /* 이미지 위에 커서가 올라가면 포인터 모양이 변화 */
+    #div_books .bi-cart-plus-fill{ 
+        /* 선택자를 .bi, .i로 해도 선택 가능 */
+        cursor : pointer;
+        color:green;
+        font-size:1.5rem;
+    }
+</style>
+<div class="row my-5">
+    <div class="col">
+        <!--검색폼-->
+        <div class="row mb-2 justify-content-end">
+            <!-- 아래 마진 2, 오른쪽 정렬 -->
+            <form name="frm" class="col-6 col-md-4 col-lg-3">
+                <div class="input-group">
+                    <input name="query" class="form-control" value="자바">
+                    <button class="btn btn-primary">검색</button>
+                </div>
+            </form>
+        </div>
+       <!--도서검색결과-->
+       <div id="div_books" class="row"></div>
+       <!--페이지 이동버튼-->
+       <div class="text-center">
+        <button id="prev" class="btn btn-primary">이전</button>
+        <sapn id="span_page" class="mx-3">1/10</sapn>
+        <button id="next" class="btn btn-primary">다음</butoon>
+       </div>
+    </div>
+</div>
+
+<!--도서검색 템플릿-->
+<script type="x-handlebars-template" id="temp_books">
+    {{#each documents}}
+        <div class="col-6 col-md-4 col-lg-2 mb-3">
+            <!-- 컬럼은 최대 12칸 -->
+            <!-- md 출력결과 수, mb 마진바텀 -->
+            <div class="card">
+                <div class="card-body">
+                    <img src="{{check thumbnail}}" width="90%" index="{{@index}}">
+                    <!-- index : 몇번째 데이터인지 알 수 있음 (보통 0부터 들어감) -->
+                    <div class="ellipsis pt-3" style="font-size:0.8rem;">
+                        {{title}}
+                    </div>
+            </div>
+            <div class="card-footer">
+                <div style="font-size:0.8rem;">{{format price}}
+                    <i class="cart bi bi-cart-plus-fill float-end" book="{{book @this}}"></i>
+                    <!-- this(오브젝트) : 전체 데이터가 다 들어감 / 오브젝트에는 스트링 밖에 줄 수 없기 때문에 book이라는 함수를 만듬 -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <%-include('books/modal.ejs')%>
+    {{/each}}
+</script>
+
+<script>
+    Handlebars.registerHelper("check", function(thumbnail){
+        if(thumbnail){
+            return thumbnail;
+        }else{
+            return "http://via.placeholder.com/120x170";
+        }
+    });
+
+    Handlebars.registerHelper("format", function(price){
+        // format함수에 매개변수 price를 넣어 함수 생성
+        if(price) return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원';
+    });
+
+    Handlebars.registerHelper("book", function(book) {
+        //@this는 function안의 book에 들어감
+        return JSON.stringify(book);
+        // book 오브젝트를 string으로 변환해주는 함수
+    })
+</script>
+
+<script type="module"> //중간고사 언급★
+    import { app } from "/javascripts/firebase.js"; //public이 root
+    import { getDatabase, ref, set, get} //set/get은 데이터를 하나씩 가져오는 것
+        from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js"; //cdn으로 불러왔기 때문에, auth가 아니라 database 사용
+        
+    const db=getDatabase(app); //app 빈칸 중간고사 언급★
+
+    let query=$(frm.query).val();
+    let page=1;
+
+    getBooks();
+
+    //장바구니 아이콘을 클릭한 경우
+    $("#div_books").on("click", ".cart", async function(){
+        // 흰색 스크립트의 앞부분 book을 가져와야한다. 중간고사 언급!!
+            if(!sessionStorage.getItem("uid")){ //세션 스토리지의 uid값이 없다면
+            location.href="/users/login";
+            return;
+        }
+        
+        //장바구니에 있는지 체크
+        const book=JSON.parse($(this).attr("book"));
+        //console.log(book);
+        //book 시험언급★, this는 cart
+        const ref_cart=ref(db, `cart/${sessionStorage.getItem("uid")}/${book.isbn}`);
+        const result = await get(ref_cart); //await 꺼내올때까지 기다림
+        //console.log(result.val());{
+        if(result.val()) {
+            alert("이미 장바구니에 있습니다.")
+        }else{
+            if(!confirm("장바구니에 추가하실래요?")) return;
+            set(ref_cart, book);
+            alert("장바구니에 추가되었습니다.");
+        }
+    });
+
+    //div_books 빈칸 언급, 클래스 네임이라 .cart를 클릭한 경우
+    
+
+    // //장바구니를 클릭한 경우
+    // $("#div_books").on("click", ".bi", function(){
+    //     if(!sessionStorage.getItem("email")){
+    //         // 비로그인 상태일 때 로그인 폼으로 이동
+    //         location.href="/users/login";
+    //     }else{
+    //         //장바구니에 등록
+    //         // string 형식의 값을 json.parse 를 통해 다시 오브젝트 형태로 변환하여 출력
+    //         const book=JSON.parse($(this).attr("book")); //string -> object
+    //         console.log(book);
+    //     }
+    // });
+
+    //이미지를 클릭한 경우
+    $("#div_books").on("click", "img", function(){
+        //인덱스 값을 가져옴
+        let index=$(this).attr("index");
+        //modal.ejs의 아이디를 인덱스 변수 값을 활용하여 각기 다른 modal을 호출
+        $("#modal" + index).modal("show");
+    });
+
+    $(frm).on("submit", function(e){
+        page = 1;
+        // 새로운 키워드로 검색할때 마다 페이지 수를 초기화
+        e.preventDefault();
+        // submit 이벤트를 막음
+        query=$(frm.query).val();
+        // 전역변수 query로부터 값을 받아와 getBooks함수 재호출하여 검색
+        getBooks();
+    });
+
+    //다음 버튼을 클릭한 경우
+    $("#next").on("click", function(){
+        page++;
+        getBooks();
+    })
+
+    
+    //이전 버튼을 클릭한 경우
+    $("#prev").on("click", function(){
+        page--;
+        getBooks();
+    })
+
+    function getBooks(){
+        $.ajax({
+            //ajax 호출 문법 : $.ajax({})
+            type:"get",
+            url:"https://dapi.kakao.com/v3/search/book?target=title",
+            headers:{"Authorization":"KakaoAK 2a1941761fe43c868ed630b500447042"},
+            data:{query:query, page:page, size:6},
+            success:function(result){
+                console.log(result);
+                let temp=Handlebars.compile($("#temp_books").html())
+                $("#div_books").html(temp(result));
+                let last = Math.ceil(result.meta.pageable_count/6);
+                $("#span_page").html(page + "/" + last);
+
+                if(page==1) $("#prev").attr("disabled", true)
+                else $("#prev").attr("disabled", false);
+
+                if(result.meta.is_end) $("#next").attr("disabled", true)
+                else $("#next").attr("disabled", false);
+        
+            }
+        });
+    }
+</script>

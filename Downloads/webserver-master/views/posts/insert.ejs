@@ -1,0 +1,41 @@
+<div class="my-5">
+    <h1 class="text-center mb-5">글쓰기</h1>
+    <form name="frm">
+        <input name="title" placeholder="제목을 입력하세요." class="form-control mb-2">
+        <!-- placeholder : 힌트 -->
+        <textarea name="body" rows="10" placeholder="내용을 입력하세요." class="form-control"></textarea>
+        <!-- rows : 여러 줄을 넣어줄 수 있음 -->
+
+        <div class="text-center my-3">
+            <button class="btn btn-primary px-5" type="submit">등록</button>
+            <!-- 타입 생략시 submit -->
+            <button class="btn btn-secondary px-5" type="reset">취소</button>
+        </div>
+        <script type="module">
+            import { app } from "/javascripts/firebase.js";
+            import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+            const db = getFirestore(app);
+            //setdoc doc를 설정할때, getdoc doc를 가져올때, adddoc doc를 넣어줄때 / collection 어디에 넣어줄건지 지정
+
+            $(frm).on("submit", async function(e){
+                e.preventDefault();
+                const title=$(frm.title).val();
+                const body=$(frm.body).val();
+                if(title == "" || body == ""){
+                    alert("제목과 내용을 입력하세요!");
+                    $(frm.title).focus();
+                }else{
+                    if(confirm("저장하실래요?")){
+                        //게시글 저장
+                        const email = sessionStorage.getItem("email");
+                        const date=moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+                        //console.log(date, email, title, body);
+                        await addDoc(collection(db, 'posts'), {date, email, title, body});
+                        alert("등록완료!");
+                        location.href="/posts";
+                    }
+                }
+            })
+        </script>
+    </form>
+</div>
